@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.test.mapper.BannerMapper">
+    <select id="getBannerList" resultType="BannerDto">
+        select * from banner
+    </select>
+    <delete id="deleteBanner">
+        delete from banner where banNo=${banNo}
+    </delete>
+    <insert id="addBanner">
+        insert into banner( banTitle, banContent,banRegDate, banImg) VALUES( #{banTitle}, #{banContent}, now(), #{banImg})
+    </insert>
+    <select id="selectBanner" resultType="BannerDto">
+        select * from banner where banNo=${banNo}
+    </select>
+    <update id="editBanner">
+        update banner set banTitle=#{banTitle}, banContent=#{banContent}, banImg=#{banImg} where banNo=#{banNo}
+    </update>
+    <!--<update id="editBannerWithoutImage">
+        update banner set banTitle=#{banTitle}, banName=#{banName}, banPrice=#{banPrice} where banNo=#{banNo}
+    </update>-->
+</mapper>
