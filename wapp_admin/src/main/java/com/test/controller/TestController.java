@@ -1,7 +1,9 @@
-package com.test.controller; // 0
+package com.test.controller;
 
+import com.test.dto.BannerDto;
 import com.test.dto.LectureDto;
 import com.test.dto.TestDto;
+import com.test.service.test.BannerService;
 import com.test.service.test.LectureService;
 import com.test.service.test.TestService;
 import com.test.util.firebase.FirebaseMessagingSnippets;
@@ -22,7 +24,8 @@ public class TestController { // 1
 
     @Autowired
     ServletContext servletContext;
-
+    @Autowired
+    BannerService bannerService;
     @Autowired
     TestService testService;
     @Autowired
@@ -39,6 +42,110 @@ public class TestController { // 1
         }
         return "admin/home";
     }
+
+    @GetMapping("/admin/banner-data-table.do") //banner-data-table.jsp 실행
+    //get방식 : 주소에 쳐서 들어갈수있음 - post방식 : 주어진 버튼(protected)외에는 들어갈수 없음
+    public String dataBanner(Model model) {// 배너 데이터 보여주기
+        try {
+            System.out.println("banner.do Controller");
+            ArrayList<BannerDto> BannerList = bannerService.getBannerList();
+            model.addAttribute("BannerList", BannerList);//addAttribue("파일이름", 매개변수)=>속성추가
+        } catch (Exception e) {
+            e.printStackTrace();//리턴값없는 예외처리
+        }
+        return "admin/banner-data-table";
+    }
+
+    @PostMapping(value = "/admin/addBanner.do") //배너 추가
+    public String addBanner(@Param("banCount") int banCount,
+                        @Param("banTitle") String banTitle,
+                        @Param("banContent") String banContent,
+                        @Param("banImg") MultipartFile banImg){
+        try{
+            System.out.println("addBanner");
+            String filename = banImg.getOriginalFilename();
+            String bannerImgPath = "/files/banner/" + filename; // db에 저장될 파일 주소
+            String dirPath = servletContext.getRealPath("/") + "files\\banner\\"; // 서버에 저장될 파일 주소
+//*저장소를 따로 만들어둬야하나?
+            if (!banImg.isEmpty()){
+                banImg.transferTo(new File(dirPath + filename));//transferTo:파일저장
+                System.out.println("file upload success");
+            } else {
+                bannerImgPath = null;
+            }
+            //경고문 하나 있으면 좋을듯
+            bannerService.addBanner(banCount, banTitle, banContent, banImg);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "redirect:/admin/banner-data-table.do";
+    }
+
+
+    @GetMapping(value = "/admin/banner-delete.do") // 배너 삭제(만들어야됨)
+    public String deleteBanner(@RequestParam(value = "banCount") int banCount) {
+        try {
+            BannerDto dbBanner = bannerService.selectBanner(banCount); // 배너키로 배너 정보 가져오기
+            String dirPath = servletContext.getRealPath("/"); // 경로 저장
+            System.out.println("파일 경로 : "+servletContext.getRealPath("/"));
+            File targetFile = new File(dirPath + dbBanner.getBanImg()); // 삭제할 파일선언
+            String delName = targetFile.getName(); // 삭제할 파일 이름 변수에 저장
+            if (targetFile.delete()) { // 파일 삭제
+                System.out.println("Deleted the file: " + delName);
+            } else {
+                System.out.println("Failed to delete the file.");
+            }
+            bannerService.deleteBanner(banCount); //성공시 DB에서도 삭제
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "redirect:/admin/banner-data-table.do";
+    }
+
+    @RequestMapping(value = "/admin/editBanner.do",
+            method = {RequestMethod.POST, RequestMethod.GET}) // 배너 수정
+    public String editBanner(@Param("banCount") int banCount,
+                                      @Param("banContent") String banContent,
+                                      @Param("banTitle") String banTitle,
+                                      @Param("banImg") MultipartFile banImg){
+        try{
+            //System.out.println("hi from edit");
+            BannerDto dbBanner = bannerService.selectBanner(banCount);
+            File targetFile = new File(servletContext.getRealPath("/") + dbBanner.getBanImg());
+            String delName = targetFile.getName();
+
+            try {// 이미지가 업로드되었다면 삭제, 새로 저장후 링크 db에 저장, 같은 이름의 이미지가 서버에 저장되어있는지 확인 필요
+                System.out.println("editItemWithImg");
+                if (targetFile.delete()) {
+                    System.out.println("Deleted the file: " + delName);
+                } else {
+                    System.out.println("Failed to delete the file.");
+                }
+
+                String filename = banImg.getOriginalFilename();
+                String bannerImgPath = "/files/" + filename;
+                System.out.println("db data path : "+bannerImgPath);
+
+                if (!banImg.isEmpty()) {
+                    String dirPath = servletContext.getRealPath("/") + "files\\";
+                    banImg.transferTo(new File(dirPath + filename));
+                } else {
+                    bannerImgPath = null;
+                }
+                bannerService.editBanner(banCount, banContent, banTitle, bannerImgPath);
+            } catch (NullPointerException e) {// 이미지를 새로 업로드하지 않았으면 데이터베이스에있는 이미지를 그대로 저장
+                System.out.println("editItemWithoutImg");
+                bannerService.editBanner(banCount, banContent, banTitle, dbBanner.getBanImg());
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "redirect:/admin/banner-data-table.do";
+    }
+
+//
 
     @GetMapping("/admin") // 어드민 홈으로 유도
     public String admin(Model model){

@@ -39,7 +39,7 @@
             <ul class="nav">
 
                 <li class="nav-item">
-                    <a href="/admin" class="nav-link">
+                    <a href="/admin/home" class="nav-link">
                         <i class="link-icon" data-feather="box"></i>
                         <span class="link-title">HOME</span>
                     </a>
@@ -48,27 +48,27 @@
                 <li class="nav-item nav-category">MANAGE</li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin/form.do">
+                    <a class="nav-link" href="/admin/lecture-form.do">
                         <i class="link-icon" data-feather="feather"></i>
                         <span class="link-title">강의 관리</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin/data-table.do">
+                    <a class="nav-link" href="/admin/lecture-data-table.do">
                         <i class="link-icon" data-feather="anchor"></i>
                         <span class="link-title">강의 열람</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="">
+                    <a class="nav-link" href="/admin/banner-form.do">
                         <i class="link-icon" data-feather="inbox"></i>
-                        <span class="link-title">? 관리</span>
+                        <span class="link-title">배너 관리</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="">
+                    <a class="nav-link" href="/admin/banner-data-table.do">
                         <i class="link-icon" data-feather="layout"></i>
-                        <span class="link-title">? 관리</span>
+                        <span class="link-title">배너 열람</span>
                     </a>
                 </li>
                 <li class="nav-item">
